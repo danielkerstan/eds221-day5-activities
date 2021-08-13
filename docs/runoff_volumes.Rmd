@@ -1,0 +1,29 @@
+---
+title: "runoff volumes"
+author: "Daniel Kerstan"
+date: "8/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+
+source(here("src", "storm_runoff.R"))
+```
+
+```{r}
+predict_runoff(seq(from = 0.6, to = 0.8, by = 0.01), 182)
+
+runoff_df <- data.frame(imper_frac = seq(from = 0.6, to = 0.8, by = 0.01), runoff_vol = (predict_runoff(seq(from = 0.6, to = 0.8, by = 0.01), 182)))
+```
+
+```{r}
+runoff_graph <- ggplot(runoff_df, aes(x = imper_frac, y = runoff_vol)) + geom_point() + geom_line() + labs(x = "Impervious fraction (dimensionless)", y = "Runoff volume (cubic feet)")
+
+runoff_graph
+
+ggsave(here("figs", "runoff_graph.png"), plot = runoff_graph)
+```
+

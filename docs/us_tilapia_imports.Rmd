@@ -1,0 +1,53 @@
+---
+title: "us_tilapia_imports"
+author: "Daniel Kerstan"
+date: "8/13/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+library(skimr)
+```
+
+```{r}
+us_tilapia_imports <- read_csv(here("data", "us_tilapia_imports.csv"))
+
+summary(us_tilapia_imports)
+names(us_tilapia_imports)
+dim(us_tilapia_imports)
+skim(us_tilapia_imports)
+```
+
+```{r}
+us_tilapia_imports_long <- pivot_longer(us_tilapia_imports, -country, names_to = "year", values_to = "imports")
+us_tilapia_imports_long <- mutate(us_tilapia_imports_long, year = as.numeric(year))
+class(us_tilapia_imports_long$year)
+```
+
+```{r}
+yearly_tilapia_total <- us_tilapia_imports_long %>% group_by(year) %>% summarize(total_imports = sum(imports, na.rm = TRUE))
+```
+
+```{r}
+yearly_tilapia_total_graph <- ggplot(yearly_tilapia_total, aes(x = year, y = total_imports)) + geom_line() + labs(x = "Year", y = "Total weight of tilapia imports to the US (thousands of pounds)")
+ggsave(here("figs", "yearly_tilapia_total_graph.png"), plot = yearly_tilapia_total_graph)
+```
+
+```{r}
+countries <- c("Ecuador", "Honduras", "Costa Rica", "Mexico")
+
+yearly_tilapia_select <- us_tilapia_imports_long %>% filter(country %in% countries) 
+```
+
+```{r}
+us_tilapia_imports_select_time <- ggplot(yearly_tilapia_select, aes(x = year, y = imports)) + geom_line(aes(color = country)) + labs(title = "U.S. Tilapia imports over time by country", x = "Year", y = "Weight in imports (thousands of pounds)") + theme_grey()
+
+us_tilapia_imports_select_time
+
+ggsave(here("figs", "us_tilapia_imports_select_time.png"), plot = us_tilapia_imports_select_time)
+```
+
